@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Todo List</title>
+		<link rel="stylesheet" href="assets/css/base.css">
+		<link rel="stylesheet" href="assets/css/index.css">
+	</head>
+	<body>
+		<section id="app" class="todoapp">
+			<header class="header">
+				<h1>todos</h1>
+				<input type="text" class="new-todo" v-model:value='placeholder_data' autofocus id="task" v-on:keydown.enter='addTodolist'>
+			</header>
+			<section class="main">
+				<input class="toggle-all" type="checkbox">
+				<ul class="todo-list" id="todo-list">
+					<!-- 展示的内容 -->
+					<li v-for='(item,index) in data_array' v-bind:class='{done : item.status}'>
+						<input type="checkbox" id="checkbox" v-model="item.status"> 
+						{{item.tittle}} 
+						<span v-on:click='deleteTodolist(index)' style="float:right; padding-right:10px; cursor: pointer;">X</span>
+					</li>
+				</ul>
+			</section>
+			<footer class="footer">
+				<span class="todo-count"><strong id="count">{{data_array.length}}</strong> all itmes </span>
+				<span class="todo-count"><strong id="count">{{data_array.filter(item => !item.status).length}}</strong> undone itmes </span>
+				<button class="clear-completed" v-on:click='clearTodolist'>Clear completed</button>
+			</footer>
+		</section>
+		<script src="../node_modules/vue/dist/vue.js"></script>
+		<script>
+			var data_array = [
+				{
+					id: 1,
+					tittle: '吃饭',
+					status: true
+				},{
+					id: 2,
+					tittle: '睡觉',
+					status: false
+				},{
+					id: 3,
+					tittle: '打豆豆',
+					status: true
+				}
+			]; 
+			const app = new Vue({
+				el:'#app',
+				data: {
+					data_array: data_array,
+					placeholder_data: '请在这添加任务:'
+				},
+				methods: {
+					addTodolist: function() {
+						const todoText = this.placeholder_data.trim();
+						// 非空校验
+						if(!todoText.length) {
+							return;
+						}
+						const todos = this.data_array;
+						if(todos.length === 0) {
+							todos.push({
+								id: 1,
+								tittle: todoText,
+								status: false
+							})
+						} else {
+							todos.push({
+								id: todos[todos.length -1].id + 1,
+								tittle: todoText,
+								status: false
+							})
+						}
+						
+					},
+					deleteTodolist: function(index) {
+						this.data_array.splice(index,1);
+					},
+					clearTodolist: function() {
+						// 清空所有数据
+						if(this.data_array.length === 0) {
+							return;
+						}
+						this.data_array.splice(0);
+					}
+				},
+			})
+		</script>
+	</body>
+</html>
