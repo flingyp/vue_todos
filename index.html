@@ -85,27 +85,29 @@
 		<script src="./node_modules/vue/dist/vue.js"></script>
 		<script>
 			// 定义一个存放数据的数组
-			var data_array = [
-				{
-					id: 1,
-					title: "吃饭",
-					status: false
-				},
-				{
-					id: 2,
-					title: "睡觉",
-					status: true
-				},
-				{
-					id: 3,
-					title: "打豆豆",
-					status: true
-				}
-			];
-			const app = new Vue({
+			// var data_array = [
+			// 	{
+			// 		id: 1,
+			// 		title: "吃饭",
+			// 		status: false
+			// 	},
+			// 	{
+			// 		id: 2,
+			// 		title: "睡觉",
+			// 		status: true
+			// 	},
+			// 	{
+			// 		id: 3,
+			// 		title: "打豆豆",
+			// 		status: true
+			// 	}
+			// ];
+			window.app = new Vue({
 				el: "#app",
 				data: {
-					data_array: data_array,
+					// data_array: data_array,
+					// 利用 localstorage 实现本地化存储
+					data_array: JSON.parse(window.localStorage.getItem('dataArray') || '[]'),
 					goedit: null
 				},
 				methods: {
@@ -115,21 +117,22 @@
 						if(value === '') {
 							alert('请输入事项:');
 						} else {
-							if(data_array.length === 0) {
-								data_array.push({
+							if(app.data_array.length === 0) {
+								app.data_array.push({
 									id: 1,
 									title: value,
 									status: false
 								})
 							} else {
-								data_array.push({
-									id: data_array[data_array.length -1].id + 1,
+								app.data_array.push({
+									id: app.data_array[app.data_array.length -1].id + 1,
 									title: value,
 									status: false
 								})
 							}
 						}
 						e.target.value = '';
+						// console.log("敲击了");
 					}
 
 					,changeStatus: function(e) {
@@ -143,7 +146,7 @@
 					
 					,daleteData: function(item,index,e) {
 						// 根据数组的下标删除数据
-						this.data_array.splice(index, 1)
+						app.data_array.splice(index, 1)
 					}
 
 					,dbEdit: function(item,e) {
@@ -204,7 +207,17 @@
 						}
 					}
 				},
-
+				watch: {
+					data_array: {
+						handler: function(val,oldval) {
+							// console.log('变化了');
+							// 利用 localStorage 进行本地化存储
+							window.localStorage.setItem('dataArray', JSON.stringify(val));
+						},
+						deep:true,
+						immediate: true
+					}
+				}
 			});
 		</script>
 	</body>
