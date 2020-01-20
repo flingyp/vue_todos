@@ -30,7 +30,7 @@
 					<ul class="todo-list">
 						<!-- These are here just to show the structure of the list items -->
 						<!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
-						<li v-for="(item, index) in data_array"
+						<li v-for="(item, index) in fliterData"
 							v-bind:class='{
 								completed: item.status,
 								editing: goedit === item
@@ -58,13 +58,13 @@
 					<!-- Remove this if you don't implement routing -->
 					<ul class="filters">
 						<li>
-							<a class="selected" href="#/">All</a>
+							<a v-bind:class="{selected: filterText === ''}" href="#/">All</a>
 						</li>
 						<li>
-							<a href="#/active">Active</a>
+							<a v-bind:class="{selected: filterText === 'active'}" href="#/active">Active</a>
 						</li>
 						<li>
-							<a href="#/completed">Completed</a>
+							<a v-bind:class="{selected: filterText === 'completed'}" href="#/completed">Completed</a>
 						</li>
 					</ul>
 					<!-- Hidden if no completed items are left ↓ -->
@@ -108,7 +108,8 @@
 					// data_array: data_array,
 					// 利用 localstorage 实现本地化存储
 					data_array: JSON.parse(window.localStorage.getItem('dataArray') || '[]'),
-					goedit: null
+					goedit: null,
+					filterText: ''
 				},
 				methods: {
 					addTodo: function(e) {
@@ -117,15 +118,15 @@
 						if(value === '') {
 							alert('请输入事项:');
 						} else {
-							if(app.data_array.length === 0) {
-								app.data_array.push({
+							if(this.data_array.length === 0) {
+								this.data_array.push({
 									id: 1,
 									title: value,
 									status: false
 								})
 							} else {
-								app.data_array.push({
-									id: app.data_array[app.data_array.length -1].id + 1,
+								this.data_array.push({
+									id: this.data_array[this.data_array.length -1].id + 1,
 									title: value,
 									status: false
 								})
@@ -170,8 +171,8 @@
 					}
 					
 					,clearCompleted: function() {
-						for(let i=0; i<data_array.length; i++) {
-							if(data_array[i].status === true) {
+						for(let i=0; i<this.data_array.length; i++) {
+							if(this.data_array[i].status === true) {
 								this.data_array.splice(i,1);
 								// 删除元素之后，让我们遍历的这个 小索引 往后倒退一次，
        							// 因为你删除之后，后面的所有元素的索引都会倒退一次
@@ -205,7 +206,22 @@
 								item.status = checked
 							})
 						}
+					},
+					
+					fliterData: function() {
+						// 用于过滤 data_array 数组的数据 根据 .status
+						switch(this.filterText) {
+							case 'active':
+								return this.data_array.filter(item => !item.status);
+								break;
+							case 'completed':
+								return this.data_array.filter(item => item.status);
+								break;
+							default:
+								return this.data_array;
+						}
 					}
+					
 				},
 				watch: {
 					data_array: {
@@ -219,6 +235,13 @@
 					}
 				}
 			});
+			// 保持页面初始化状态 开始先调用一次
+			hashchange(); 
+			// 在window对象下注册 onhashchange事件 用于改变 app.filterText 的值
+			window.onhashchange = hashchange;
+			function hashchange(e) {
+				app.filterText = window.location.hash.substr(2);
+			}
 		</script>
 	</body>
 </html>
