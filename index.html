@@ -15,9 +15,9 @@
 				<h1>todos</h1>
 				<input
 					class="new-todo"
-					placeholder="What needs to be done?"
-					autofocus
+					placeholder="What needs to be done?"					
 					v-on:keydown.enter='addTodo($event)'
+					v-focus
 				/>
 			</header>
 			<!-- This section should be hidden by default and shown when there are todos -->
@@ -43,10 +43,12 @@
 									v-on:click='daleteData(item,index,$event)'
 								></button>
 							</div>
-							<input class="edit" v-bind:value='item.title'
+							<input class="edit" 
+								v-bind:value='item.title'
 								v-on:keydown.enter='saveEdit(item,index,$event)'
 								v-on:blur='saveEdit(item,index,$event)'
 								v-on:keydown.esc = 'cancelEdit'
+								v-dbfocus='goedit === item'
 							>
 						</li>
 					</ul>
@@ -102,12 +104,30 @@
 			// 		status: true
 			// 	}
 			// ];
+
+			Vue.directive('focus', {
+				inserted: function(el, binding) {
+					// 实现 初次打开页面后 input 聚集
+					el.focus();
+				}
+			})
+
+			Vue.directive('dbfocus', {
+				update: function(el, binding) {
+					if(binding.value === true) {
+						// 实现元素双击 聚集
+						el.focus();
+					}
+				}
+			})
+
 			window.app = new Vue({
 				el: "#app",
 				data: {
 					// data_array: data_array,
 					// 利用 localstorage 实现本地化存储
 					data_array: JSON.parse(window.localStorage.getItem('dataArray') || '[]'),
+					// 双击的元素对象
 					goedit: null,
 					filterText: ''
 				},
@@ -235,10 +255,13 @@
 					}
 				}
 			});
+			
 			// 保持页面初始化状态 开始先调用一次
 			hashchange(); 
+			
 			// 在window对象下注册 onhashchange事件 用于改变 app.filterText 的值
 			window.onhashchange = hashchange;
+		
 			function hashchange(e) {
 				app.filterText = window.location.hash.substr(2);
 			}
